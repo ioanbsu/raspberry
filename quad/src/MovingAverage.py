@@ -33,4 +33,3 @@ millis = int(round(time.time() * 1000))
 for i in range(0, 500):
     rand = randint(1, 50)
     test.add(rand)
-    print test.getAverageValue(), ", ", rand

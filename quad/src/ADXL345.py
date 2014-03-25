@@ -1,6 +1,6 @@
 # axelerometer
 
-
+import math
 # ADXL345 constants
 EARTH_GRAVITY_MS2 = 9.80665
 SCALE_MULTIPLIER = 0.004
@@ -89,7 +89,11 @@ class ADXL345:
         y = round(y, 4)
         z = round(z, 4)
 
-        return {"x": x, "y": y, "z": z}
+        radiansAngle = math.radians(-45)
+        newX = math.cos(radiansAngle) * x - math.sin(radiansAngle) * y
+        newY = math.sin(radiansAngle) * x + math.cos(radiansAngle) * y
+
+        return {"x": newX, "y": newY, "z": z}
 
 
 if __name__ == "__main__":
