@@ -18,7 +18,7 @@ class MovingAverage:
         self.dataArray.append(value)
 
 
-    def getAverageValue(self):
+    def avg(self):
         totalValue = 0
         counter = 0
         for value in self.dataArray:

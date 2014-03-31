@@ -89,11 +89,11 @@ class ADXL345:
         y = round(y, 4)
         z = round(z, 4)
 
-        radiansAngle = math.radians(-45)
-        newX = math.cos(radiansAngle) * x - math.sin(radiansAngle) * y
-        newY = math.sin(radiansAngle) * x + math.cos(radiansAngle) * y
+        radiansAroundZ = math.radians(45 + 180)
+        newX = (math.cos(radiansAroundZ) * x - math.sin(radiansAroundZ) * y)
+        newY = math.sin(radiansAroundZ) * x + math.cos(radiansAroundZ) * y
 
-        return {"x": newX, "y": newY, "z": z}
+        return {"x": newX, "y": newY * -1, "z": z}
 
 
 if __name__ == "__main__":
