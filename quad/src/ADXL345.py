@@ -3,7 +3,7 @@
 import math
 # ADXL345 constants
 EARTH_GRAVITY_MS2 = 9.80665
-SCALE_MULTIPLIER = 0.004
+SCALE_MULTIPLIER = 0.0042
 
 DATA_READ_ADDRESS = 0x53
 
@@ -94,6 +94,16 @@ class ADXL345:
         newY = math.sin(radiansAroundZ) * x + math.cos(radiansAroundZ) * y
 
         return {"x": newX, "y": newY * -1, "z": z}
+
+
+    def _get_rotation(self, x, y, z):
+        return math.atan(x / math.sqrt((y * y) + (z * z)))
+
+    def getRotations(self, hmc58883l):
+        axes = self.getAxes(True)
+        xRotation = self._get_rotation(axes['x'], axes['z'], axes['y'])
+        yRotation = self._get_rotation(axes['y'], axes['z'], axes['x'])
+        return {"x": xRotation, "y": yRotation, "z": hmc58883l.heading()}
 
 
 if __name__ == "__main__":

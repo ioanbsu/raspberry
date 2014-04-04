@@ -6,7 +6,6 @@ from ADXL345 import ADXL345
 from BMP085 import BMP085
 from HMC58883l import HMC5883l
 from L3G4200D import L3G4200D
-from MovingAverage import MovingAverage
 
 
 revision = ([l[12:-1] for l in open('/proc/cpuinfo', 'r').readlines() if l[:8] == "Revision"] + ['0000'])[0]
@@ -17,31 +16,19 @@ bmp085 = BMP085(bus)
 hmc58883l = HMC5883l(bus)
 l3g4200d = L3G4200D(bus)
 axes = adxl345.getAxes(True)
-
-
-def dist(a, b):
-    return math.sqrt((a * a) + (b * b))
-
-
-def get_rotation(x, y, z):
-    radians = math.atan(x / dist(y, z))
-    return radians
-
+rotations = adxl345.getRotations(hmc58883l)
 
 if len(sys.argv) >= 2 and sys.argv[1] == 'stat':
-    gx = MovingAverage(100)
-    gy = MovingAverage(100)
-    gz = MovingAverage(100)
+    print "axelX,axelY,axelZ,Temp,Pressure,Compass,GyroX,GyroY,GyroZ"
     for i in range(0, 5000):
+        axesSpeedsData = l3g4200d.getSpeeds()
         axes = adxl345.getAxes(True)
         x = axes['x']
         y = axes['y']
         z = axes['z']
-        gx.add(x)
-        gy.add(y)
-        gz.add(z)
-        print "{0},{1},{2},{3},{4},{5}".format(x, y, z, gx.avg(), gy.avg(),
-                                               gz.avg())
+        print "{0},{1},{2},{3},{4},{5},{6},{7},{8}".format(x, y, z, bmp085.readTemperature(), bmp085.readPressure(),
+                                                           hmc58883l.heading(), axesSpeedsData['x'],
+                                                           axesSpeedsData['y'], axesSpeedsData['z'])
 else:
     print "Axelerometer data:(ADXL345)"
     print "   x = %.3fG" % ( axes['x'] )
@@ -49,10 +36,8 @@ else:
     print "   z = %.3fG" % ( axes['z'] )
     print "====================================="
 
-    xRotation = get_rotation(-1 * axes['y'], axes['z'], axes['x'])
-    yRotation = get_rotation(axes['x'], axes['y'], axes['z'])
-    zRotation = hmc58883l.heading()
-    print "X: {0}; Y: {1}; Z: {2}".format(xRotation, yRotation, math.radians(zRotation))
+    print "X: {0}; Y: {1}; Z: {2}".format(math.degrees(rotations['x']), math.degrees(rotations['y']),
+                                          math.degrees(rotations['z']))
 
     print "\nBarometer data(BMP085):"
     print "Temperature: %.2f C" % (bmp085.readTemperature())
@@ -64,9 +49,10 @@ else:
     print "Degrees: ", hmc58883l.degrees(hmc58883l.heading())
 
     print "\nGyro data(L3G4200D):"
-    print "X = %.3fG " % l3g4200d.getX()
-    print "Y = %.3fG " % l3g4200d.getY()
-    print "Z = %.3fG " % l3g4200d.getZ()
+    axesSpeedsData = l3g4200d.getSpeeds()
+    print "X = %.3fG " % axesSpeedsData['x']
+    print "Y = %.3fG " % axesSpeedsData['y']
+    print "Z = %.3fG " % axesSpeedsData['z']
     print "Temperature = %.3f " % l3g4200d.getTemperature()
 
 

@@ -59,7 +59,7 @@ class HMC5883l:
         x = self.__convert(data, 3)
         y = self.__convert(data, 7)
         z = self.__convert(data, 5)
-        z = self.__convert(data, 5)
+
         return (x, y, z)
 
     def heading(self):
@@ -76,8 +76,8 @@ class HMC5883l:
             headingRad -= 2 * math.pi
 
         # Convert to degrees from radians
-        headingDeg = headingRad * 180 / math.pi
-        return headingDeg
+        # headingDeg = headingRad * 180 / math.pi
+        return headingRad
 
     def degrees(self, headingDeg):
         degrees = math.floor(headingDeg)

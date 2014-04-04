@@ -28,30 +28,22 @@ ALPHA_CONSTANT = 4
 
 G_MATRIX = [0.5, 0.5, 0.2]
 
-averagePeriod = 50
+averagePeriod = 20
 xRotation = MovingAverage(averagePeriod)
 yRotation = MovingAverage(averagePeriod)
-zRotation = MovingAverage(averagePeriod)
+zRotation = MovingAverage(10)
 
 xAngSpeed = MovingAverage(averagePeriod)
 yAngSpeed = MovingAverage(averagePeriod)
 zAngSpeed = MovingAverage(averagePeriod)
 
 flySeconds = 5
-init_torque = 2000
+init_torque = 200
 if len(sys.argv) == 3:
     flySeconds = int(sys.argv[1])
     init_torque = int(sys.argv[2])
 
 print "Running time:{0}; torque: {1}".format(flySeconds, init_torque)
-
-
-def dist(a, b):
-    return math.sqrt((a * a) + (b * b))
-
-
-def get_rotation(x, y, z):
-    return math.atan(x / dist(y, z))
 
 
 def sin(angle):
@@ -62,28 +54,21 @@ def cos(yRotation):
     return math.cos(yRotation)
 
 
-def calculateTorques():
-    # angles
-    adxl345 = ADXL345(bus)
-    axelerometer = adxl345.getAxes(True)
-    hmc58883l = HMC5883l(bus)
-
+def calculateTorques(rotations,ang_speeds):
     # speeds
-    l3g4200d = L3G4200D(bus)
-
-    xRotation.add(get_rotation(-1 * axelerometer['x'], axelerometer['z'], axelerometer['x']))
-    yRotation.add(get_rotation(axelerometer['y'], axelerometer['x'], axelerometer['z']))
-    zRotation.add(math.radians(hmc58883l.heading()))
+    xRotation.add(rotations['x'])
+    yRotation.add(rotations['y'])
+    zRotation.add(rotations['z'])
 
     speedDividor = 100.
 
-    xAngSpeed.add(l3g4200d.getX() / speedDividor)
-    yAngSpeed.add(l3g4200d.getY() / speedDividor)
-    zAngSpeed.add(l3g4200d.getZ() / speedDividor)
+    xAngSpeed.add(ang_speeds['x'])
+    yAngSpeed.add(ang_speeds['y'])
+    zAngSpeed.add(ang_speeds['z'])
 
-    x_vel_avg = xAngSpeed.avg()
-    y_vel_avg = yAngSpeed.avg()
-    z_vel_avg = zAngSpeed.avg()
+    x_vel_avg = xAngSpeed.avg() / speedDividor
+    y_vel_avg = yAngSpeed.avg() / speedDividor
+    z_vel_avg = zAngSpeed.avg() / speedDividor
 
     x_rotation_avg = xRotation.avg()
     y_rotation_avg = yRotation.avg()
@@ -103,7 +88,7 @@ def calculateTorques():
     # xSpeed, ySpeed,
     #
     # zSpeed, xTorque, yTorque, zTorque)
-    return [xTorque, yTorque, zTorque, x_rotation_avg, y_rotation_avg, z_rotation_avg, x_vel_avg, y_vel_avg, z_vel_avg]
+    return [xTorque, yTorque, zTorque]
 
 
 def calculateMotorSpeeds(torques, T):
@@ -132,29 +117,23 @@ def runMotors(q1, q3, q2, q4):
 
 millis = int(round(time.time() * 1000))
 
-torques = calculateTorques()
-motorSpeeds = calculateMotorSpeeds(torques, init_torque)
-q1 = MOTOR_STOPPED + int(motorSpeeds[0])
-q2 = MOTOR_STOPPED + int(motorSpeeds[1])
-q3 = MOTOR_STOPPED + int(motorSpeeds[2])
-q4 = MOTOR_STOPPED + int(motorSpeeds[3])
-print " {0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12}".format(q1, q3, q2, q4, torques[0], torques[1],
-                                                                       torques[2], torques[3], torques[4],
-                                                                       torques[5], torques[6], torques[7],
-                                                                       torques[8])
 while millis + flySeconds * 1000 > int(round(time.time() * 1000)):
-    torques = calculateTorques()
+    adxl345 = ADXL345(bus)
+    rotations=adxl345.getRotations(hmc58883l)
+    l3g4200d = L3G4200D(bus)
+    ang_speeds = l3g4200d.getSpeeds()
+
+    torques = calculateTorques(rotations,ang_speeds)
     motorSpeeds = calculateMotorSpeeds(torques, init_torque)
     adjusted = 2350
     q1 = MOTOR_STOPPED + int(motorSpeeds[0] - adjusted) / 5
     q2 = MOTOR_STOPPED + int(motorSpeeds[1] - adjusted) / 5
     q3 = MOTOR_STOPPED + int(motorSpeeds[2] - adjusted) / 5
     q4 = MOTOR_STOPPED + int(motorSpeeds[3] - adjusted) / 5
-    print " {0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12}".format(q1, q3, q2, q4, torques[0], torques[1],
-                                                                           torques[2], torques[3], torques[4],
-                                                                           torques[5], torques[6], torques[7],
-                                                                           torques[8])
+    print " {0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12}".format(q1, q3, q2, q4,
+                                                                           torques[0], torques[1],torques[2],
+                                                                           rotations['x'],rotations['y'],rotations['z'],
+                                                                           ang_speeds['x'],ang_speeds['y'],ang_speeds['z'])
     runMotors(q1, q3, q2, q4)
 else:
     runMotors(MOTOR_STOPPED, MOTOR_STOPPED, MOTOR_STOPPED, MOTOR_STOPPED)
-    print "done"
