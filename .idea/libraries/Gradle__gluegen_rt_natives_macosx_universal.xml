@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Gradle: gluegen-rt-natives-macosx-universal">
+    <CLASSES>
+      <root url="jar:///Applications/Processing.app/Contents/Java/core/library/gluegen-rt-natives-macosx-universal.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -50,9 +50,9 @@ class ADXL345:
     def setRange(self, range_flag):
         value = self.bus.read_byte_data(self.address, DATA_FORMAT)
 
-        value &= ~0x0F;
-        value |= range_flag;
-        value |= 0x08;
+        value &= ~0x0F
+        value |= range_flag
+        value |= 0x08
 
         self.bus.write_byte_data(self.address, DATA_FORMAT, value)
 
@@ -101,8 +101,8 @@ class ADXL345:
 
     def getRotations(self, hmc58883l):
         axes = self.getAxes(True)
-        xRotation = self._get_rotation(axes['x'], axes['z'], axes['y'])
-        yRotation = self._get_rotation(axes['y'], axes['z'], axes['x'])
+        yRotation = self._get_rotation(axes['x'], axes['z'], axes['y'])
+        xRotation = self._get_rotation(axes['y'], axes['z'], axes['x'])
         return {"x": xRotation, "y": yRotation, "z": hmc58883l.heading()}
 
 

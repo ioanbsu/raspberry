@@ -3,19 +3,8 @@ import time
 import math
 import sys
 
-import smbus
-from ADXL345 import ADXL345
-from BMP085 import BMP085
-from HMC58883l import HMC5883l
-from L3G4200D import L3G4200D
-from MovingAverage import MovingAverage
+from myQuad import CopterDataReader
 
-
-revision = ([l[12:-1] for l in open('/proc/cpuinfo', 'r').readlines() if l[:8] == "Revision"] + ['0000'])[0]
-bus = smbus.SMBus(1 if int(revision, 16) >= 4 else 0)
-
-bmp085 = BMP085(bus)
-hmc58883l = HMC5883l(bus)
 
 q1MotorAddress = 4
 q2MotorAddress = 3
@@ -29,14 +18,6 @@ ALPHA_CONSTANT = 4
 G_MATRIX = [0.5, 0.5, 0.2]
 
 averagePeriod = 20
-xRotation = MovingAverage(averagePeriod)
-yRotation = MovingAverage(averagePeriod)
-zRotation = MovingAverage(10)
-
-xAngSpeed = MovingAverage(averagePeriod)
-yAngSpeed = MovingAverage(averagePeriod)
-zAngSpeed = MovingAverage(averagePeriod)
-
 flySeconds = 5
 init_torque = 200
 if len(sys.argv) == 3:
@@ -45,6 +26,8 @@ if len(sys.argv) == 3:
 
 print "Running time:{0}; torque: {1}".format(flySeconds, init_torque)
 
+
+copter_data_reader = CopterDataReader()
 
 def sin(angle):
     return math.sin(angle)

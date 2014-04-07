@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: core">
+    <CLASSES>
+      <root url="jar:///Applications/Processing.app/Contents/Java/core/library/core.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../processing/core/src" />
+      <root url="file://$PROJECT_DIR$/../processing/core/methods/src" />
+    </SOURCES>
+  </library>
+</component>
