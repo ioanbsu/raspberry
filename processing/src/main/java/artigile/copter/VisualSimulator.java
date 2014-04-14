@@ -7,6 +7,7 @@ import com.google.common.io.CharStreams;
 import com.google.common.io.Files;
 import processing.core.PApplet;
 import processing.opengl.PGraphics3D;
+import sun.plugin2.message.Message;
 
 import java.io.File;
 import java.io.IOException;
@@ -89,7 +90,7 @@ public class VisualSimulator extends PApplet {
             copterStateData.setYaw((float) Math.random());
             lastChecked = System.currentTimeMillis();
         }
-        data = copterStateData;//readFromServer();// readFromServer();//  parsedDataIterator.next();//
+        data =readFromServer();// copterStateData;//readFromServer();//   parsedDataIterator.next();//
         background(0);
         lights();
 
@@ -138,6 +139,8 @@ public class VisualSimulator extends PApplet {
         copterStateData.setRoll(copterStateData.getRoll() + torques.getRoll() / 10 + randomA);
         copterStateData.setPitch(copterStateData.getPitch() + torques.getPitch() / 10 + randomB);
         copterStateData.setYaw(copterStateData.getYaw() + torques.getYaw() / 10 + randomC);
+
+//        System.out.println(MessageFormat.format("{0},{1},{2}",torques.getRoll(),torques.getPitch(),torques.getYaw()));
     }
 
     private CopterStateData readFromServer() {
@@ -159,7 +162,7 @@ public class VisualSimulator extends PApplet {
 
     private Torques getDesiredTorques(CopterStateData copterStateData) {
         final float G_MATRIX[] = new float[]{0.5F, 0.5F, .2F};
-        int ALPHA_CONSTANT = 10;
+        int ALPHA_CONSTANT = 20;
 
         float roll = copterStateData.getPitch();
         float pitch = copterStateData.getRoll();
@@ -179,7 +182,7 @@ public class VisualSimulator extends PApplet {
 
     private MotorSpeeds getMotorSpeeds(Torques torques) {
         float a1 = 62690.9247649F;
-        float a2 = 2000;
+        float a2 = 10000;
         float a3 = 8620.690F;
         int constantDesiredTorque = (int) (100 * a3);
 
